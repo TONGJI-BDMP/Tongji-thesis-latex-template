@@ -1,0 +1,58 @@
+% 示例插图源文件（不参与正文编译）。
+% 重新生成 figures/demo-figures.pdf：
+%   latexmk -xelatex -outdir=figures figures/demo-figures.tex
+% 生成的 PDF 共三页：第 1 页为单幅插图，第 2、3 页为子图示例的两个分图。
+\documentclass[multi={tikzpicture},border=4pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+\begin{document}
+
+% ---------- 第 1 页：单幅插图（位移时程） ----------
+\begin{tikzpicture}[x=1.5cm,y=1.2cm,font=\small]
+  \draw[->] (0,0) -- (5.9,0) node[below right] {$t$ (s)};
+  \draw[->] (0,-1.7) -- (0,1.9) node[left] {$u$ (mm)};
+  \foreach \x in {1,2,3,4,5} {
+    \draw (\x,0) -- (\x,-0.06) node[below,font=\scriptsize] {\x};
+  }
+  \foreach \y in {-1,1} {
+    \draw (0,\y) -- (-0.06,\y) node[left,font=\scriptsize] {\y};
+  }
+  \draw[thick,domain=0:5.6,samples=400]
+    plot (\x,{1.45*exp(-0.32*\x)*cos(2.5*\x r)});
+  \foreach \x in {0.35,0.90,1.45,2.00,2.60,3.20,3.90,4.60,5.30} {
+    \fill (\x,{1.45*exp(-0.32*\x)*cos(2.5*\x r)}) circle (0.65pt);
+  }
+\end{tikzpicture}
+
+% ---------- 第 2 页：子图示例 (a)（另一条位移时程） ----------
+\begin{tikzpicture}[x=1.05cm,y=1.0cm,font=\small]
+  \draw[->] (0,0) -- (5.9,0) node[below right] {$t$ (s)};
+  \draw[->] (0,-1.7) -- (0,1.9) node[left] {$u$ (mm)};
+  \foreach \x in {1,2,3,4,5} {
+    \draw (\x,0) -- (\x,-0.06) node[below,font=\scriptsize] {\x};
+  }
+  \foreach \y in {-1,1} {
+    \draw (0,\y) -- (-0.06,\y) node[left,font=\scriptsize] {\y};
+  }
+  \draw[thick,domain=0:5.6,samples=400]
+    plot (\x,{1.30*exp(-0.18*\x)*cos(1.8*\x r)});
+\end{tikzpicture}
+
+% ---------- 第 3 页：子图示例 (b)（幅值谱） ----------
+\begin{tikzpicture}[x=1.05cm,y=1.0cm,font=\small]
+  \draw[->] (0,0) -- (5.9,0) node[below right] {$\omega$ (rad/s)};
+  \draw[->] (0,0) -- (0,1.9) node[left] {$|U|$ (mm)};
+  \foreach \x/\h in {0.6/1.40,1.5/0.66,2.4/0.36,3.3/0.19,4.2/0.10,5.1/0.05} {
+    \draw[line width=1pt] (\x,0) -- (\x,\h);
+    \fill (\x,\h) circle (0.9pt);
+  }
+  \foreach \x/\l in {1.5/2,3.0/4,4.5/6} {
+    \draw (\x,0) -- (\x,-0.06) node[below,font=\scriptsize] {\l};
+  }
+  \foreach \y in {1} {
+    \draw (0,\y) -- (-0.06,\y) node[left,font=\scriptsize] {\y};
+  }
+\end{tikzpicture}
+
+\end{document}

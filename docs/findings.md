@@ -84,3 +84,20 @@
 - TOC leader dots match the reference's 6.0 pt pitch (`\renewcommand{\cftdotsep}{2.25}`; tocloft's default 4.5 mu produced 9.0 pt).
 - Chinese cover form rebuilt from measured reference coordinates: labels left-aligned at x=178 pt, two-character labels spread over a 4-character field, full-width colons boxed so values start cleanly at x=258 pt, row pitch exactly 31.2 pt, first row top at 441.95 pt, last row at 691.55 pt, date top at 753.90 pt. The old tabular version mis-spread labels (`\hfill` overrode centering), misaligned 4-character labels, and let xeCJK punctuation compression overlap values into the colon.
 - English cover uses its own English metadata (`\thesisauthoren`, `\schoolen`, `\categoryen`, `\disciplineen`, `\subdisciplineen`, `\researchfielden`, `\supervisoren`, `\associatesupervisoren`, `\jointinstitutionen`) rendered as a `\leftskip=83.66pt` hanging-indent list at x=173.2 pt with 31 pt pitch; long entries wrap aligned under their labels like the Word sample.
+
+## Pitfall: `\label` right after a sectioning command
+- `\section{X}\label{y}` (label on its own line, or followed by a blank line) adds an extra
+  blank line of about 12.1 pt when the next content is another heading (`\subsection{...}`).
+  `\ctexset`'s `\@xsect` ends with `\ignorespaces` while a paragraph is still pending, so the
+  label's write whatsit lands in that otherwise empty horizontal list; the `\par` issued by the
+  following heading then typesets it as a line.
+- Measured ink-gap from the section title to the subsection title (600 dpi): 43.66 pt without
+  the label (reference sample: 43.75 pt, so 43.66 pt is correct), 55.76 pt with the label on its
+  own line, 55.76 pt with a blank line in between. Body text between the headings makes it
+  harmless.
+- Verified workaround: put the label inside the section argument, `\section{X\label{y}}`
+  (43.66 pt). Equivalent: place the label after the section's first body paragraph.
+- Template-level attempts that were tried and reverted (each gave a wrong value): appending
+  `\par` to `\@xsect`; recording the afterskip in `\@afterheading` and cancelling it from the
+  `\subsection` wrapper; adding `\vskip\z@` before the wrapper's `\addvspace`. Results were
+  29.76 pt or 55.76 pt instead of 43.66 pt, so the class keeps the stock ctex behaviour.

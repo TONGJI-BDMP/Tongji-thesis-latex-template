@@ -6,8 +6,10 @@
 % Word settings: margins 2.54 cm (top/bottom), 3.17 cm (left/right).
 % The offsets place the top of the visible header text 2.00 cm from the physical
 % top edge and the bottom of the footer glyphs 1.50 cm from the bottom edge.
+% headheight/headsep also fix the header rule (fancyhdr \headrule) at the
+% position measured in the reference (glyph rows 71.28-71.88 pt).
 \RequirePackage[a4paper,left=3.17cm,right=3.17cm,top=2.54cm,bottom=2.54cm,
-  headheight=25.3pt,headsep=-10.15pt,footskip=0.96cm]{geometry}
+  headheight=16pt,headsep=0.72pt,footskip=0.96cm]{geometry}
 \RequirePackage{fontspec}
 \RequirePackage{xeCJK}
 \RequirePackage{graphicx}
@@ -15,6 +17,8 @@
 \RequirePackage{booktabs}
 \RequirePackage{tabularx}
 \RequirePackage{caption}
+\RequirePackage{subcaption}
+\RequirePackage{tabularray}
 \RequirePackage{fancyhdr}
 \RequirePackage{tocloft}
 \RequirePackage{enumitem}
@@ -74,7 +78,9 @@
     titleformat=\relax,
     % Calibrated against the reference: title glyph top 103.6 pt, title to
     % the following first section heading 39.97 pt, both measured in the sample.
-    beforeskip=14.2bp,
+    % The page-top \topskip (see \thesispagetopskip) supplies part of the
+    % 24 pt Word preskip, so the remainder is preset here.
+    beforeskip=-0.63pt,
     afterskip=37.1bp,
     aftername=\enspace,
     pagestyle=tongjimain
@@ -102,21 +108,33 @@
 \let\tongji@origsubsection\subsection
 \renewcommand{\subsection}{\@nobreakfalse\tongji@origsubsection}
 
+% Page-top "paragraph before" space of the body text (0.7 line), used both by
+% \thesispagetopskip and above floats that drift to the top of a page: Word
+% keeps that space for whatever starts a page, so a figure or table at the top
+% of a page stays as far from the header rule as the first line of body text.
+\newlength{\tongji@bodytopsep}\setlength{\tongji@bodytopsep}{14.88pt}
+\patchcmd{\@cflt}{\unvbox\@tempboxa}{\vskip\tongji@bodytopsep\unvbox\@tempboxa}%
+  {}{\PackageWarning{tongjithesis}{\string\@cflt\space could not be patched}}
+
+% Header line: 5th-size SimSun, centred, with the sample's rule drawn by
+% fancyhdr's \headrule (position set by \headsep above).  The reference keeps
+% the glyph top 2.00 cm from the paper edge; the raisebox restores that offset
+% after the header box was shortened to pull the rule down to the sample's rule.
 \newcommand{\tongji@head}[1]{%
-  \songti\zihao{5}#1\par\vspace{2pt}\hrule height 0.75bp
+  \raisebox{1.33pt}{\songti\zihao{5}\fontsize{10.5bp}{12bp}\selectfont#1}%
 }
 \fancypagestyle{tongjifront}{
   \fancyhf{}
   \fancyhead[C]{\tongji@head{\leftmark}}
   \fancyfoot[C]{\rmfamily\zihao{5}\Roman{page}}
-  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\headrulewidth}{0.75bp}
   \renewcommand{\footrulewidth}{0pt}
 }
 \fancypagestyle{tongjimain}{
   \fancyhf{}
   \fancyhead[C]{\tongji@head{\leftmark}}
   \fancyfoot[C]{\rmfamily\zihao{5}\arabic{page}}
-  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\headrulewidth}{0.75bp}
   \renewcommand{\footrulewidth}{0pt}
 }
 \fancypagestyle{tongjideclaration}{
@@ -132,6 +150,9 @@
   justification=centering,singlelinecheck=true,skip=6bp}
 \captionsetup[table]{font={small},labelfont=normalfont,labelsep=quad,
   justification=centering,singlelinecheck=true,skip=6bp,position=top}
+% Sub-captions follow the same look: "(a)  子图题".
+\captionsetup[sub]{font={small},labelfont=normalfont,labelsep=quad,
+  justification=centering,singlelinecheck=false,skip=6bp}
 \AtEndEnvironment{figure}{\vspace{6bp}}
 \renewcommand{\theequation}{\thechapter.\arabic{equation}}
 \renewcommand{\thefigure}{\thechapter.\arabic{figure}}
@@ -140,7 +161,7 @@
 \setcounter{tocdepth}{2}
 \renewcommand{\cfttoctitlefont}{\hfill\heiti\bfseries\zihao{3}}
 \renewcommand{\cftaftertoctitle}{\hfill}
-\setlength{\cftbeforetoctitleskip}{16bp}
+\setlength{\cftbeforetoctitleskip}{1.18pt}
 \setlength{\cftaftertoctitleskip}{25.5bp}
 \renewcommand{\cftchapfont}{\songti\zihao{-4}}
 \renewcommand{\cftsecfont}{\songti\zihao{-4}}
@@ -311,7 +332,8 @@
 \newenvironment{cnabstract}[1]{
   \clearpage
   \markboth{摘要}{摘要}
-  \begin{center}\vspace*{16bp}{\heiti\bfseries\zihao{3}摘要\par}\vspace{11bp}\end{center}
+  % The page-top \topskip also lifts this title, so its own skip is reduced.
+  \begin{center}\vspace*{1.18pt}{\heiti\bfseries\zihao{3}摘要\par}\vspace{11bp}\end{center}
   \linespread{1}\songti\zihao{-4}\fontsize{12bp}{20bp}\selectfont
   \def\tongji@keywords{#1}\par\noindent\hspace*{2em}\ignorespaces
 }{
@@ -320,7 +342,7 @@
 }
 \newenvironment{enabstract}[1]{
   \markboth{Abstract}{Abstract}
-  \begin{center}\vspace*{16bp}{\arialfont\bfseries\zihao{3}ABSTRACT\par}\vspace{11bp}\end{center}
+  \begin{center}\vspace*{1.18pt}{\arialfont\bfseries\zihao{3}ABSTRACT\par}\vspace{11bp}\end{center}
   \linespread{1}\rmfamily\zihao{-4}\fontsize{12bp}{20bp}\selectfont\setlength{\parindent}{2em}
   \def\tongji@keywords{#1}\par\noindent\hspace*{2em}\ignorespaces
 }{
@@ -333,8 +355,17 @@
   {\linespread{1}\fontsize{12bp}{18bp}\selectfont\tableofcontents\thispagestyle{tongjifront}}
   \clearpage
 }
+% Word gives the first body line on a page a "paragraph before" space of
+% 0.7 line (fixed 20 pt leading -> 14 pt).  LaTeX discards inter-paragraph
+% glue at the top of a page, so the page-top body spacing is carried by
+% \topskip instead.  The reference renders the first body line 14.88 pt lower
+% than \topskip=12pt would place it (first-line glyph top 89.0 pt in the sample);
+% titles that start a page have their own preskip reduced by the same amount
+% so every previously calibrated position is preserved.
+\newcommand{\thesispagetopskip}{%
+  \setlength{\topskip}{12pt}\addtolength{\topskip}{\tongji@bodytopsep}}
 \newcommand{\thesisfrontmatter}{%
-  \clearpage\@mainmatterfalse\pagenumbering{Roman}\pagestyle{tongjifront}%
+  \clearpage\thesispagetopskip\@mainmatterfalse\pagenumbering{Roman}\pagestyle{tongjifront}%
 }
 \newcommand{\thesismainmatter}{%
   \clearpage\@mainmattertrue\pagenumbering{arabic}\pagestyle{tongjimain}%
@@ -347,14 +378,15 @@
   \specialchapter{致谢}\linespread{1}\fangsong\zihao{-4}\fontsize{12bp}{20bp}\selectfont
 }{\par}
 \newenvironment{thesiscv}{
-  \ctexset{chapter={beforeskip=-3bp,afterskip=24bp}}
+  \ctexset{chapter={beforeskip=-17.9pt,afterskip=24bp}}
   \specialchapter{个人简历、在读期间发表的学术成果}
   \linespread{1}\songti\zihao{5}\fontsize{10.5bp}{16bp}\selectfont\setlength{\parindent}{0pt}
 }{\par}
 
 \newcommand{\makedeclarations}{
   \clearpage\pagestyle{tongjideclaration}\thispagestyle{tongjideclaration}\markboth{}{}
-  \begingroup\linespread{1}\songti\fontsize{14bp}{26bp}\selectfont
+  \begingroup\setlength{\topskip}{12pt}%
+  \linespread{1}\songti\fontsize{14bp}{26bp}\selectfont
   \begin{center}{\heiti\bfseries\fontsize{18bp}{22bp}\selectfont 同济大学学位论文原创性声明\par}\end{center}
   \vspace{14bp}\noindent\hspace*{2em}%
   本人郑重声明：所呈交的学位论文《\tongji@title》，是本人在导师指导下，独立进行研究工作所取得的成果。除文中已经注明引用的内容外，本学位论文的研究成果不包含任何他人创作的、已公开发表或者没有公开发表的作品的内容。对本论文所涉及的研究工作做出贡献的其他个人和集体，均已在文中以明确方式标明。本学位论文原创性声明的法律责任由本人承担。

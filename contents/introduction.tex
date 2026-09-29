@@ -8,7 +8,7 @@
 灾后救援与重建提供保障。20 世纪中叶以来，尽管社会发展水平有了巨大的提
 高，然而由于灾害性作用而造成的损失却反而越来越大，这给结构工程学科带来
 了一系列新的挑战性课题。正是在这样的背景下，基于性能的设计思想开始浮出
-水面，并在近十年来引起了学者们强烈的兴趣
+水面，并在近十年来引起了学者们强烈的兴趣\cite{chen2021}。
 
 
 ``自然界只有一个，自然现象遵循着不依赖于人类意志的客观规律。然而，
@@ -29,30 +29,86 @@
 随机结构分析以来，已经成为检验各种随机结构分析方法的基本手段。基于随机
 摄动展开的随机结构静力分析与动力分析也已于 20 世纪 80 年代基本完善。
 
+......
 
-三级标题采用黑体四号。公式居中，编号右对齐：
+......
+
+
+本模板给出了典型样式的用例，供用户参考。样式用例包括公式、插图、子图、表格、参考文献等。样式用例见第~\ref{sec:style} 节。
+
+\section{样式参考\label{sec:style}}
+\subsection{公式}
+
+公式居中，编号右对齐。如公式~\eqref{eq:example} 所示：
 \begin{equation}
-  E = mc^2 .
+  E = mc^2 . \label{eq:example}
 \end{equation}
 
-图应清晰可辨，图题置于图下方；表题通常置于表上方。
+多行公式可以采用 \texttt{align} 或者 \texttt{gather} 环境。
+\begin{align}
+  a &= b + c,  \label{eq:align1}\\
+  d &= e + f + g,  \label{eq:align2}
+\end{align}
+或者
+\begin{gather}
+  a = b + c,  \label{eq:gather1}\\
+  d = e + f + g.  \label{eq:gather2}
+\end{gather}
+
+
+插图建议先在外部绘制成 PDF 再引入，图题置于图下方。如图~\ref{fig:example} 所示。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\rule{0pt}{3.5cm}\rule{8cm}{0pt}}
-  \caption{示例图题}
+  \includegraphics[width=0.72\linewidth,page=1]{demo-figures.pdf}
+  \caption{单幅插图示例（位移时程）}
   \label{fig:example}
 \end{figure}
 
+含子图的插图用 \texttt{subcaption} 宏包的 \texttt{subfigure} 环境排版，各分图单独编号，
+可以分别引用（图~\ref{fig:example-a}、图~\ref{fig:example-b}），如图~\ref{fig:subfigures} 所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[c]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,page=2]{demo-figures.pdf}
+    \caption{位移时程}
+    \label{fig:example-a}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[c]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,page=3]{demo-figures.pdf}
+    \caption{幅值谱}
+    \label{fig:example-b}
+  \end{subfigure}
+  \caption{含子图的插图示例}
+  \label{fig:subfigures}
+\end{figure}
+
+表题通常置于表上方。表格统一用 \texttt{tabularray} 宏包排版，三线表写法如表~\ref{tab:example} 所示。
 \begin{table}[htbp]
   \centering
-  \caption{示例表题}
+  \caption{表格示例（三线表）}
   \label{tab:example}
-  \begin{tabular}{ccc}
-    \toprule
-    项目 & 数值一 & 数值二 \\
-    \midrule
-    示例 & 1.0 & 2.0 \\
-    \bottomrule
-  \end{tabular}
+  \begin{tblr}{
+    colspec   = {c c c c},
+    hline{1,Z} = {0.75bp},
+    hline{2}   = {0.4bp},
+    row{1}     = {font=\bfseries},
+    rowsep     = 4pt,
+  }
+    模型   & 均值 & 标准差 & 变异系数 \\
+    示例一 & 1.00 & 0.10   & 0.10     \\
+    示例二 & 2.00 & 0.35   & 0.18     \\
+    示例三 & 3.00 & 0.72   & 0.24     \\
+  \end{tblr}
 \end{table}
+
+\section{参考文献}
+
+以上示例给出了公式、插图、子图与表格的常用写法。图、表、公式均应在正文中先行引用，
+再给出其内容；表格宽度一般不超过版心宽度，跨页的长表格可改用 \texttt{longtblr} 环境。
+文献引用使用 \verb|\cite| 命令，参考文献列表由 \texttt{biblatex} 依据
+\texttt{references.bib} 自动生成。

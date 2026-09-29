@@ -23,7 +23,8 @@ latexmk -c
 - `contents/metadata.tex`：论文中英文元数据信息（同时写入 PDF 文档属性）。
 - `contents/abstract.tex`：中英文摘要。
 - `contents/`：各章节、附录、致谢和个人简历。
-- `figures/`：论文插图。
+- `figures/`：论文插图；`figures/demo-figures.tex` 是示例插图的 TikZ 源文件，编译得到
+  `figures/demo-figures.pdf`（共三页：单幅插图与子图示例的两个分图）。
 - `assets/`：封面校标等模板资源。
 - `fonts/`：模板显式加载的中文字体文件。
 - `references.bib`：BibLaTeX 文献数据库。
@@ -45,8 +46,10 @@ latexmk -c
 1. 在 `contents/metadata.tex` 中修改题目、作者、学院、学科、导师和日期等中英文信息；英文封面使用对应的 `\thesisauthoren`、`\schoolen`、`\disciplineen`、`\supervisoren` 等英文信息命令；PDF 文档属性会同步写入标题、作者、主题和 `\thesiskeywords` 关键词。
 2. 在 `contents/abstract.tex` 的 `cnabstract`、`enabstract` 环境中填写中英文摘要及关键词。
 3. 按需要在 `contents/` 中增加章节，并在 `main.tex` 中使用 `\include` 引入。
-4. 将图片放入 `figures/`，通过 `\includegraphics` 插入。
-5. 将文献写入 `references.bib`，正文用 `\cite{文献键}` 引用。
-6. 模板默认输出单独的书脊打印页；设置 `\spinetitle` 修改书脊题目，不需要书脊时可注释 `\makespine`。
+4. 将图片放入 `figures/`，通过 `\includegraphics` 插入；含子图时用 `subcaption` 宏包的
+   `subfigure` 环境（见 `contents/introduction.tex` 示例）。
+5. 表格统一用 `tabularray` 宏包排版（三线表写法见 `contents/introduction.tex` 示例）。
+6. 将文献写入 `references.bib`，正文用 `\cite{文献键}` 引用。
+7. 模板默认输出单独的书脊打印页；设置 `\spinetitle` 修改书脊题目，不需要书脊时可注释 `\makespine`。
 
 提交前应以研究生院当年发布的正式要求为准，并重点复核封面信息、声明页文字、纸质装订线和所在院系的补充规定。
