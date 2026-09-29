@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{tongjithesis}[2026/09/18 Tongji University thesis template]
 
-\LoadClass[UTF8,zihao=-4,fontset=none,openany]{ctexbook}
+\LoadClass[UTF8,zihao=-4,fontset=none,openright]{ctexbook}
 
 % Word settings: margins 2.54 cm (top/bottom), 3.17 cm (left/right).
 % The offsets place the top of the visible header text 2.00 cm from the physical
@@ -10,6 +10,11 @@
 % position measured in the reference (glyph rows 71.28-71.88 pt).
 \RequirePackage[a4paper,left=3.17cm,right=3.17cm,top=2.54cm,bottom=2.54cm,
   headheight=16pt,headsep=0.72pt,footskip=0.96cm]{geometry}
+% Chapter-level material always starts on a recto (odd) page; the blank verso
+% inserted by \cleardoublepage must carry no header/footer.
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+  \hbox{}\thispagestyle{empty}\newpage \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+
 \RequirePackage{fontspec}
 \RequirePackage{xeCJK}
 \RequirePackage{graphicx}
@@ -34,7 +39,7 @@
 \setCJKfamilyfont{song}[Path=fonts/,AutoFakeBold=2.5]{simsun.ttf}
 \setCJKfamilyfont{hei}[Path=fonts/,AutoFakeBold=2.5]{simhei.ttf}
 \setCJKfamilyfont{fang}[Path=fonts/,AutoFakeBold=2.5]{simfang.ttf}
-\setCJKfamilyfont{li}[Path=fonts/,AutoFakeBold=2.5]{lishu.ttf}
+\setCJKfamilyfont{li}[Path=fonts/,AutoFakeBold=4]{lishu.ttf}
 \newcommand{\songti}{\CJKfamily{song}}
 \newcommand{\heiti}{\CJKfamily{hei}}
 \newcommand{\fangsong}{\CJKfamily{fang}}
@@ -273,7 +278,7 @@
   \vfill
   \begin{center}{\songti\zihao{3}\tongji@date\par}\end{center}
   \vspace{-10.75pt}
-  \clearpage
+  \cleardoublepage
 }
 
 \newcommand{\makeenglishcover}{
@@ -307,7 +312,7 @@
   \vfill
   \begin{center}{\rmfamily\zihao{3}\tongji@dateen\par}\end{center}
   \vspace{0.1cm}
-  \clearpage
+  \cleardoublepage
 }
 
 % A separate printable spine guide. The narrow parboxes keep Chinese glyphs upright.
@@ -384,7 +389,7 @@
 }{\par}
 
 \newcommand{\makedeclarations}{
-  \clearpage\pagestyle{tongjideclaration}\thispagestyle{tongjideclaration}\markboth{}{}
+  \cleardoublepage\pagestyle{tongjideclaration}\thispagestyle{tongjideclaration}\markboth{}{}
   \begingroup\setlength{\topskip}{12pt}%
   \linespread{1}\songti\fontsize{14bp}{26bp}\selectfont
   \begin{center}{\heiti\bfseries\fontsize{18bp}{22bp}\selectfont 同济大学学位论文原创性声明\par}\end{center}
