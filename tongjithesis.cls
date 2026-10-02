@@ -15,6 +15,10 @@
 \def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
   \hbox{}\thispagestyle{empty}\newpage \if@twocolumn\hbox{}\newpage\fi\fi\fi}
 
+% Word leaves page bottoms ragged (it never stretches paragraphs to
+% fill a page); float separations then stay independent of page slack.
+\raggedbottom
+
 \RequirePackage{fontspec}
 \RequirePackage{xeCJK}
 \RequirePackage{graphicx}
@@ -120,6 +124,20 @@
 \newlength{\tongji@bodytopsep}\setlength{\tongji@bodytopsep}{14.88pt}
 \patchcmd{\@cflt}{\unvbox\@tempboxa}{\vskip\tongji@bodytopsep\unvbox\@tempboxa}%
   {}{\PackageWarning{tongjithesis}{\string\@cflt\space could not be patched}}
+% Visible white below float boxes (table bottom / in-text figure caption /
+% page-top figure caption) targets about one body line (20 bp ~ 20 pt), matching
+% the sample annotation "图题 … 段后 12 磅"; the fixed lengths absorb the
+% caption/line metric differences so all three cases measure alike.
+\newlength{\tongji@hfloatbelowsep}\setlength{\tongji@hfloatbelowsep}{4.3pt}
+\newlength{\tongji@topfloatbelowsep}\setlength{\tongji@topfloatbelowsep}{10.9pt}
+\patchcmd{\@addtocurcol}{\box\@currbox \penalty\interlinepenalty \vskip\intextsep}%
+  {\box\@currbox \penalty\interlinepenalty \vskip\tongji@hfloatbelowsep}%
+  {}{\PackageWarning{tongjithesis}{\string\@addtocurcol\space below-space could not be patched}}
+% The page-top \topskip also sits in the collected page material; without the
+% second skip the first line after a top float would be \tongji@bodytopsep too
+% far below it.
+\patchcmd{\@cflt}{\vskip \textfloatsep}{\vskip \tongji@topfloatbelowsep \vskip -\tongji@bodytopsep}%
+  {}{\PackageWarning{tongjithesis}{\string\@cflt\space below-space could not be patched}}
 
 % Header line: 5th-size SimSun, centred, with the sample's rule drawn by
 % fancyhdr's \headrule (position set by \headsep above).  The reference keeps
@@ -226,10 +244,18 @@
 \def\tongji@associate{}
 \def\tongji@joint{}
 \def\tongji@degreetype{学术学位}
-\def\tongji@date{二〇二六年五月}
-\def\tongji@dateen{May 2026}
+% Cover dates default to the month of the compilation date; \coverdate and
+% \coverdateen can still pin them.  The year digits are taken from the literal
+% expansion of \the\year (division in \numexpr rounds, so arithmetic is unsafe).
+\newcommand{\tongji@cnDigit}[1]{\ifcase#1 〇\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\fi}
+\newcommand{\tongji@cnmonth}{\ifcase\month\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\or 十\or 十一\or 十二\fi}
+\newcommand{\tongji@monthen}{\ifcase\month\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
+\def\tongji@cnyear#1#2#3#4\@nil{%
+  \tongji@cnDigit{#1}\tongji@cnDigit{#2}\tongji@cnDigit{#3}\tongji@cnDigit{#4}}
+\def\tongji@date{\expandafter\tongji@cnyear\the\year\@nil 年\tongji@cnmonth 月}
+\def\tongji@dateen{\tongji@monthen\ \the\year}
 \def\tongji@degreeen{Engineering}
-\def\tongji@spinetitle{中文论文题目}
+\def\tongji@spinetitle{\tongji@title}
 \def\tongji@authoren{San ZHANG}
 \def\tongji@schoolen{College of Civil Engineering}
 \def\tongji@categoryen{Engineering}
@@ -254,15 +280,15 @@
   \vspace*{0.25cm}
   \begin{center}
     \includegraphics[width=10cm,height=2.6cm]{tongji-logo-000.png}
-    \vspace{0.376cm}
+    \vspace{0.376cm minus 0.2cm}
 
     {\lishu\bfseries\zihao{2} 博士学位论文\par}
-    \vspace{0.664cm}
+    \vspace{0.664cm minus 0.3cm}
     {\lishu\bfseries\zihao{3}（\tongji@degreetype）\par}
-    \vspace{1.6cm}
+    \vspace{1.6cm minus 1cm}
     {\heiti\bfseries\zihao{2}\tongji@title\par}
   \end{center}
-  \vspace{3.035cm}
+  \vspace{3.035cm minus 1.5cm}
   {\linespread{1}\fangsong\zihao{3}\fontsize{16bp}{31.2bp}\selectfont
     \tongji@coverrow{姓\hfill 名}{\tongji@author}
     \tongji@coverrow{学\hfill 号}{\tongji@studentid}
@@ -272,7 +298,8 @@
     \tongji@coverrow{二级学科}{\tongji@subdiscipline}
     \tongji@coverrow{研究方向}{\tongji@researchfield}
     \tongji@coverrow{指导教师}{\tongji@supervisor}
-    \tongji@coverrowL{联合培养单位}{\tongji@joint}
+    \ifx\tongji@associate\@empty\else\tongji@coverrowL{联合培养导师}{\tongji@associate}\fi
+    \ifx\tongji@joint\@empty\else\tongji@coverrowL{联合培养单位}{\tongji@joint}\fi
     \par
   }
   \vfill
@@ -306,8 +333,8 @@
     Second-level Discipline/Degree's Field: \tongji@subdisciplineen\par
     Research Fields: \tongji@researchfielden\par
     Supervisor: \tongji@supervisoren\par
-    Associate Supervisor: \tongji@associateen\par
-    Joint Training Institution: \tongji@jointen\par
+    \ifx\tongji@associateen\@empty\else Associate Supervisor: \tongji@associateen\par\fi
+    \ifx\tongji@jointen\@empty\else Joint Training Institution: \tongji@jointen\par\fi
   }
   \vfill
   \begin{center}{\rmfamily\zihao{3}\tongji@dateen\par}\end{center}
@@ -315,21 +342,52 @@
   \cleardoublepage
 }
 
-% A separate printable spine guide. The narrow parboxes keep Chinese glyphs upright.
+% Printable spine guide.  Every line is one CJK glyph centred on a common axis;
+% explicit line breaks in the cover title are ignored here.  The four gaps --
+% above the title, between title/author/university, and below the university --
+% are computed to be exactly equal; a title too long for its share is scaled
+% down, so it can never collide with the author line.
+\newlength{\tongji@spinewidth}
+\setlength{\tongji@spinewidth}{0.95cm}
+\newlength{\tongji@spineheight}
+\setlength{\tongji@spineheight}{23.1cm}
+\newlength{\tongji@spineavail}
+\newlength{\tongji@spinegap}
+\newsavebox{\tongji@spineboxA}
+\newsavebox{\tongji@spineboxB}
+\newsavebox{\tongji@spineboxC}
+\newcommand{\tongji@spinestack}[1]{%
+  \parbox[b]{\tongji@spinewidth}{\centering\let\\\ignorespaces #1\par}%
+}
 \newcommand{\makespine}{
   \thispagestyle{empty}
   \vspace*{-1.3cm}
   \begin{center}
-    \fbox{\begin{minipage}[t][23.1cm][t]{0.95cm}
-      \centering\linespread{1}\fangsong\bfseries\zihao{4}\fontsize{14bp}{16bp}\selectfont
-      \vspace*{3.7cm}
-      \parbox{1em}{\centering\tongji@spinetitle}
-      \vfill
-      \parbox{1em}{\centering\tongji@author}
-      \vfill
-      \parbox{1em}{\centering 同济大学}
-      \vspace*{3.8cm}
-    \end{minipage}}
+  {\linespread{1}\fangsong\bfseries\zihao{4}\fontsize{14bp}{16bp}\selectfont
+    \sbox{\tongji@spineboxA}{\tongji@spinestack{\tongji@spinetitle}}%
+    \sbox{\tongji@spineboxB}{\tongji@spinestack{\tongji@author}}%
+    \sbox{\tongji@spineboxC}{\tongji@spinestack{同济大学}}%
+    \setlength{\tongji@spineavail}{\dimexpr\tongji@spineheight
+      -\ht\tongji@spineboxB-\dp\tongji@spineboxB
+      -\ht\tongji@spineboxC-\dp\tongji@spineboxC-64bp\relax}%
+    \ifdim\tongji@spineavail<48bp \setlength{\tongji@spineavail}{48bp}\fi
+    \ifdim\dimexpr\ht\tongji@spineboxA+\dp\tongji@spineboxA\relax>\tongji@spineavail
+      \sbox{\tongji@spineboxA}{\resizebox{!}{\tongji@spineavail}{\usebox{\tongji@spineboxA}}}%
+    \fi
+    \setlength{\tongji@spinegap}{\dimexpr(\tongji@spineheight
+      -\ht\tongji@spineboxA-\dp\tongji@spineboxA
+      -\ht\tongji@spineboxB-\dp\tongji@spineboxB
+      -\ht\tongji@spineboxC-\dp\tongji@spineboxC)/4\relax}%
+    \fbox{\begin{minipage}[t][\tongji@spineheight][t]{\tongji@spinewidth}
+      \centering
+      \vspace*{\tongji@spinegap}%
+      \usebox{\tongji@spineboxA}%
+      \par\vspace*{\tongji@spinegap}%
+      \usebox{\tongji@spineboxB}%
+      \par\vspace*{\tongji@spinegap}%
+      \usebox{\tongji@spineboxC}%
+      \par\vspace*{\tongji@spinegap}%
+    \end{minipage}}}
   \end{center}
   \clearpage
 }
